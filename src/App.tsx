@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { ToastProvider } from './context/ToastContext';
 import { LandingPage } from './pages/LandingPage';
@@ -19,91 +19,77 @@ import { DashboardLayout } from './layouts/DashboardLayout';
 
 const AppContent: React.FC = () => {
   const [currentPath, setCurrentPath] = useState<string>('/');
-  const { user } = useAuth();
+  const { isAuthenticated, isLoading } = useAuth();
 
   const handleNavigate = (path: string) => {
     setCurrentPath(path);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  const renderPage = () => {
-    switch (currentPath) {
-      case '/':
-        return <LandingPage onNavigate={handleNavigate} />;
-      case '/login':
-        return <LoginPage onNavigate={handleNavigate} />;
-      case '/register':
-        return <RegisterPage onNavigate={handleNavigate} />;
-      case '/dashboard':
-        return (
-          <DashboardLayout currentPath={currentPath} onNavigate={handleNavigate}>
-            <DashboardPage onNavigate={handleNavigate} />
-          </DashboardLayout>
-        );
-      case '/members':
-        return (
-          <DashboardLayout currentPath={currentPath} onNavigate={handleNavigate}>
-            <MembersPage onNavigate={handleNavigate} />
-          </DashboardLayout>
-        );
-      case '/memberships':
-        return (
-          <DashboardLayout currentPath={currentPath} onNavigate={handleNavigate}>
-            <MembershipsPage />
-          </DashboardLayout>
-        );
-      case '/trainers':
-        return (
-          <DashboardLayout currentPath={currentPath} onNavigate={handleNavigate}>
-            <TrainersPage />
-          </DashboardLayout>
-        );
-      case '/workouts':
-        return (
-          <DashboardLayout currentPath={currentPath} onNavigate={handleNavigate}>
-            <WorkoutsPage />
-          </DashboardLayout>
-        );
-      case '/attendance':
-        return (
-          <DashboardLayout currentPath={currentPath} onNavigate={handleNavigate}>
-            <AttendancePage />
-          </DashboardLayout>
-        );
-      case '/payments':
-        return (
-          <DashboardLayout currentPath={currentPath} onNavigate={handleNavigate}>
-            <PaymentsPage />
-          </DashboardLayout>
-        );
-      case '/reports':
-        return (
-          <DashboardLayout currentPath={currentPath} onNavigate={handleNavigate}>
-            <ReportsPage />
-          </DashboardLayout>
-        );
-      case '/ai-coach':
-        return (
-          <DashboardLayout currentPath={currentPath} onNavigate={handleNavigate}>
-            <AICoachPage />
-          </DashboardLayout>
-        );
-      case '/profile':
-        return (
-          <DashboardLayout currentPath={currentPath} onNavigate={handleNavigate}>
-            <ProfilePage />
-          </DashboardLayout>
-        );
-      case '/settings':
-        return (
-          <DashboardLayout currentPath={currentPath} onNavigate={handleNavigate}>
-            <SettingsPage />
-          </DashboardLayout>
-        );
-      default:
-        return <LandingPage onNavigate={handleNavigate} />;
+  // Sync navigation with authentication status
+  useEffect(() => {
+    if (isLoading) return;
+
+    const publicPaths = ['/', '/login', '/register'];
+    const isPublicPath = publicPaths.includes(currentPath);
+
+    if (isAuthenticated && isPublicPath) {
+      setCurrentPath('/dashboard');
+    } else if (!isAuthenticated && !isPublicPath) {
+      setCurrentPath('/login');
     }
-  };
+  }, [isAuthenticated, isLoading, currentPath]);
+
+  // Loading spinner while checking local auth session
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen bg-slate-900 text-white">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-500"></div>
+      </div>
+    );
+  }
+
+  // Wrapper for authenticated pages inside the Dashboard Layout
+ const renderProtected = (title: string, children: React.ReactNode) => (
+  <DashboardLayout title={title} currentPath={currentPath} onNavigate={handleNavigate}>
+    {children}
+  </DashboardLayout>
+);
+
+  const renderPage = () => {
+  switch (currentPath) {
+    case '/':
+      return <LandingPage onNavigate={handleNavigate} />;
+    case '/login':
+      return <LoginPage onNavigate={handleNavigate} />;
+    case '/register':
+      return <RegisterPage onNavigate={handleNavigate} />;
+    case '/dashboard':
+      return renderProtected('Dashboard', <DashboardPage onNavigate={handleNavigate} />);
+    case '/members':
+      return renderProtected('Members', <MembersPage onNavigate={handleNavigate} />);
+    case '/memberships':
+      return renderProtected('Memberships', <MembershipsPage />);
+    case '/trainers':
+      return renderProtected('Trainers', <TrainersPage />);
+    case '/workouts':
+      return renderProtected('Workouts', <WorkoutsPage />);
+    case '/attendance':
+      return renderProtected('Attendance', <AttendancePage />);
+    case '/payments':
+      return renderProtected('Payments', <PaymentsPage />);
+    case '/reports':
+      return renderProtected('Reports', <ReportsPage />);
+    case '/ai-coach':
+      return renderProtected('AI Coach', <AICoachPage />);
+    case '/profile':
+      return renderProtected('Profile', <ProfilePage />);
+    case '/settings':
+      return renderProtected('Settings', <SettingsPage />);
+    default:
+      return <LandingPage onNavigate={handleNavigate} />;
+  }
+};
 
   return <>{renderPage()}</>;
 };
