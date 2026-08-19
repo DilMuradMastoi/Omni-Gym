@@ -1,0 +1,6 @@
+{
+  "name": "Gym Management System",
+  "description": "Comprehensive Gym SaaS platform with Role-based Auth (Admin, Trainer, Member), JSON persistence, Workout Builder, Attendance Tracking, Payments & Reports.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
