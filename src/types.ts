@@ -2,6 +2,7 @@ export type UserRole = 'Admin' | 'Trainer' | 'Member';
 
 export interface User {
   id: string;
+  name: string;
   fullName: string;
   username: string;
   email: string;

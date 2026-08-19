@@ -63,12 +63,20 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         ? 'Trainer' 
         : 'Member';
 
-      const mockUser: User = {
-        id: 'demo-user-123',
-        name: email.split('@')[0].replace('.', ' '),
-        email,
-        role: mockRole,
-      };
+   const mockUser: User = {
+  id: 'demo-user-123',
+  name: email.split('@')[0].replace('.', ' '),
+  fullName: email.split('@')[0].replace('.', ' '),
+  username: email.split('@')[0],
+  email,
+  phone: '+1234567890',
+  gender: 'Other',
+  dateOfBirth: '1990-01-01',
+  role: mockRole,
+  avatarUrl: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100',
+  status: 'Active',
+  createdAt: new Date().toISOString(),
+};
 
       saveAuthData('mock-demo-jwt-token', mockUser);
       return;
